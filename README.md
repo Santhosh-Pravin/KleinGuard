@@ -169,4 +169,74 @@ KleinGuard accesses platform data only with explicit user consent and reads it i
 
 ---
 
+## 🚨 Adversarial Defense & Anti-Spoofing Strategy
+
+> *500 delivery partners. Fake GPS. Real payouts. A coordinated fraud ring just drained a platform's liquidity pool. This is how KleinGuard fights back.*
+
+Simple GPS verification is dead. KleinGuard's architecture was designed from the ground up to treat location data as one signal among many — not as ground truth. Here is how the system tells a genuinely stranded Mani apart from a bad actor faking it from his couch.
+
+---
+
+### 1. The Differentiation — Genuine Stranded Worker vs. GPS Spoofer
+
+A real delivery partner caught in a disruption leaves a coherent, multi-signal trail. A spoofer does not.
+
+When a trigger event occurs, KleinGuard does not simply ask "is the worker's GPS in the affected zone?" It asks a harder question: does *everything else* about this worker's state in the last 30–60 minutes agree with that location?
+
+**Sensor Fusion — The Spoofing Gap**
+A spoofed GPS coordinate is clean. Real-world location is messy. The system cross-references GPS against the device's own accelerometer and gyroscope data (motion signatures), battery drain patterns (navigating in rain produces different battery behavior than sitting idle), network cell tower triangulation, and Wi-Fi access point signatures. A worker genuinely out on a flooded road will show motion, inconsistent connectivity, and cell tower movement. A worker at home will show stillness, strong stable Wi-Fi, and no motion — even if their GPS says otherwise. GPS spoofing apps cannot fake this full stack of signals simultaneously.
+
+**Platform Activity Cross-Validation**
+This is the strongest signal. KleinGuard integrates with the delivery platform's live data. A genuine claim must be corroborated by the platform showing the worker as *online and accepting orders* before the trigger event, followed by a drop in order assignments consistent with the zone disruption. A worker who was already offline, or never had orders routed to them in the claimed zone, cannot pass this check. No platform activity in the affected zone = no payout, regardless of GPS coordinates.
+
+**Historical Baseline Comparison**
+Every registered worker has a behavioral baseline built from weeks of onboarding data — their regular routes, the zones they actually work in, their typical login hours, their average order frequency. A claim filed from a zone the worker has never once operated in triggers an automatic escalation flag. Mani drives in Adyar and Velachery. If his GPS suddenly says he's in Ambattur during a flood event, that's an anomaly the system catches immediately.
+
+---
+
+### 2. The Data — What Catches a Coordinated Fraud Ring
+
+An individual spoofer is a nuisance. A ring of 500 is a different threat — and it has a different signature. Coordinated fraud is visible at the *network level*, not just the individual level.
+
+**Cluster Timing Analysis**
+Legitimate weather disruptions affect workers in a zone gradually and organically. A fraud ring triggers claims in a tight burst. KleinGuard monitors the *rate and timing distribution* of claims in any given zone during a trigger window. A natural flood event produces a curve — claims trickling in as workers hit affected streets. A coordinated ring produces a spike — dozens of claims filed within the same 2–3 minute window. The system flags any zone where the claim-filing rate exceeds the statistically expected distribution for that event type.
+
+**Social Graph & Device Fingerprinting**
+Fraud rings coordinate. That coordination leaves traces. The system builds a soft social graph from shared data points: multiple workers registering from the same device (same device fingerprint or IMEI prefix), multiple accounts linked to the same payment UPI ID, workers who consistently file claims at the same time as each other, and accounts onboarded in a sudden batch rather than organically over time. No single one of these is proof of fraud — but a cluster of accounts that share three or more of these signals is placed under heightened scrutiny automatically.
+
+**Zone Saturation Scoring**
+Each delivery zone has a known worker population derived from platform data. If the number of active claimants in a zone during a trigger event exceeds the realistic maximum number of workers who could plausibly be operating there — based on historical order volume and active delivery slots — the excess claims are quarantined for manual review. You cannot have 200 Zepto workers "stranded" in a zone that typically handles 40 concurrent deliveries.
+
+**Cross-Platform Behavioral Signals**
+Workers who are genuinely stranded tend to behave consistently: they go offline on the delivery app, they may contact support, their earnings data flatlines. Workers who are spoofing tend to show contradictions — their delivery platform profile shows them as offline or idle *before* the disruption, yet they are filing a claim for being caught in it. This inconsistency between platform status and the claim narrative is one of the highest-signal fraud indicators in the system.
+
+---
+
+### 3. The UX Balance — Flagging Fraud Without Punishing Honest Workers
+
+The hardest design problem in adversarial fraud defense is not catching bad actors — it is doing so without creating a system so paranoid it starts denying legitimate claims to genuine workers like Mani.
+
+A real disruption in Chennai during monsoon creates real network degradation. GPS accuracy drops. Cell towers become congested. Motion sensors behave unusually as workers take shelter. Any honest system has to account for this.
+
+**Tiered Claim States, Not Binary Approval/Denial**
+KleinGuard does not operate a simple approve/deny gate. Claims exist in three states: *Auto-Approved*, *Under Review*, and *Escalated*. Auto-Approved claims are those where all signals align cleanly. Under Review means one or two signals are ambiguous — the worker is not denied immediately, but the payout is held for a short verification window (typically 2–4 hours) while the system gathers additional corroborating data. Escalated claims involve multiple red flags and require a human review or a worker self-verification step.
+
+**Benefit of the Doubt for Established Workers**
+Trust is not static. A worker with 12 weeks of clean claim history, consistent location patterns, and a strong behavioral baseline gets a much wider tolerance band than a newly registered account filing a high-value claim in week one. The system adjusts its sensitivity thresholds based on the worker's trust score, which is built over time from platform activity, claim history, and behavioral consistency. Mani, after months of legitimate usage, would get auto-approved in most ambiguous scenarios. A brand-new account would not.
+
+**Transparent Escalation — No Silent Denials**
+When a claim is flagged, the worker is notified clearly and immediately through the app. The notification does not accuse. It says: *"Your claim is under review. We are verifying conditions in your area. This usually takes less than 4 hours. You do not need to do anything."* Workers who are genuinely caught in bad weather and experiencing network issues are not penalized by the delay — they simply receive their payout slightly later. Workers who are spoofing cannot produce the additional corroborating signals the system requests during the review window, so their claims stall and eventually fail.
+
+**Self-Verification as a Light-Touch Option**
+For ambiguous claims that are not clearly fraudulent but lack sufficient corroborating signals, the system can optionally prompt the worker to submit a single piece of passive evidence — a timestamped photo from their current location, or a 10-second gyroscope and network log read from the device. This is presented as a fast-track option to resolve the review early, not as a punishment. Most honest workers in a genuine disruption will have their phones in their hands anyway. Most bad actors at home will find this prompt inconvenient to fake convincingly at scale.
+
+**Post-Event Audit and Ring Disruption**
+Even after payouts clear, the system runs a 24-hour retrospective audit on every trigger event. If a pattern of coordinated fraud is detected in hindsight — a cluster of workers whose signals did not individually cross thresholds but whose collective behavior is anomalous — their accounts are flagged for manual review, their future claim thresholds are tightened, and the coordinated network is reported. This means that a well-organized fraud ring may succeed on day one, but the system learns from it and closes the window before they can repeat it.
+
+---
+
+> The goal is a system that is impossible to game at scale, forgiving of honest imperfection, and transparent enough that a legitimate worker never feels accused. KleinGuard does not treat every gig worker as a potential fraudster — it treats coordinated anomalies as the threat they actually are.
+
+---
+
 > **KleinGuard doesn't just insure risk — it protects livelihoods in real time.**
