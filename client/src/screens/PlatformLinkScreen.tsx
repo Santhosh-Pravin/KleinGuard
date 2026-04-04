@@ -21,7 +21,7 @@ export default function PlatformLinkScreen() {
   useEffect(() => {
     if (!isLoading) return;
     const interval = setInterval(() => {
-      setLoadingStep(s => {
+      setLoadingStep((s) => {
         if (s >= LOADING_TEXTS.length - 1) {
           clearInterval(interval);
           setTimeout(() => {
@@ -34,7 +34,7 @@ export default function PlatformLinkScreen() {
       });
     }, 800);
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [isLoading, selectedPlatform, setScreen, updateRegistration]);
 
   const handleAuthorize = () => {
     if (!selectedPlatform) return;
@@ -50,7 +50,6 @@ export default function PlatformLinkScreen() {
       transition={pageTransition}
       className="min-h-screen bg-mist relative"
     >
-      {/* Loading overlay */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -76,20 +75,18 @@ export default function PlatformLinkScreen() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
       <div className="bg-klein px-6 pt-12 pb-8">
         <button onClick={() => setScreen('register')} className="font-jetbrains text-[11px] text-white/50 mb-4 block">
-          ← Back
+          Back
         </button>
         <h1 className="font-syne font-extrabold text-[26px] text-white tracking-headline">
           Link your platform
         </h1>
         <p className="font-jetbrains text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          We read your earnings and zone data — read only access.
+          We read your earnings and zone data in read-only mode.
         </p>
       </div>
 
-      {/* Platform cards */}
       <div className="px-6 pt-6 -mt-2 space-y-3">
         {PLATFORMS.map((platform, index) => (
           <motion.button
@@ -102,36 +99,30 @@ export default function PlatformLinkScreen() {
               selectedPlatform === platform.name ? 'border-klein border-active' : ''
             }`}
           >
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
-              style={{ background: `${platform.color}15` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl" style={{ background: `${platform.color}15` }}>
               {platform.emoji}
             </div>
             <div className="flex-1">
               <p className="font-syne font-bold text-[15px] text-ink">{platform.name}</p>
               <p className="font-jetbrains text-[10px] text-chrome mt-0.5">
-                Connects earnings · Orders · Zone history
+                Connects earnings, orders, and zone history
               </p>
             </div>
             {selectedPlatform === platform.name && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-3 right-3 w-6 h-6 bg-klein rounded-full flex items-center justify-center"
+                className="absolute top-3 right-3 min-w-6 h-6 bg-klein rounded-full flex items-center justify-center px-1"
               >
-                <span className="text-white text-xs">✓</span>
+                <span className="text-white text-[10px] font-jetbrains">OK</span>
               </motion.div>
             )}
           </motion.button>
         ))}
       </div>
 
-      {/* CTA */}
       <div className="px-6 mt-8">
-        <button
-          onClick={handleAuthorize}
-          disabled={!selectedPlatform}
-          className="btn-primary"
-        >
+        <button onClick={handleAuthorize} disabled={!selectedPlatform} className="btn-primary">
           Authorize Access
         </button>
       </div>

@@ -7,13 +7,13 @@ import { register } from '../lib/api';
 const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 export default function ZoneSetupScreen() {
-  const { registrationData, updateRegistration, setScreen, setToken, setUser } = useAppStore();
+  const { registrationData, updateRegistration, setScreen, setToken } = useAppStore();
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyPhone, setEmergencyPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
   const city = registrationData.city || 'Chennai';
-  const zones = CITY_ZONES[city] || CITY_ZONES['Chennai'];
+  const zones = CITY_ZONES[city] || CITY_ZONES.Chennai;
   const selectedZones = registrationData.zones || [];
 
   const toggleZone = (zone: string) => {
@@ -26,7 +26,7 @@ export default function ZoneSetupScreen() {
 
   const handleContinue = async () => {
     if (selectedZones.length === 0 || !registrationData.work_days) return;
-    
+
     setLoading(true);
     try {
       const res = await register({
@@ -44,7 +44,6 @@ export default function ZoneSetupScreen() {
       setScreen('risk-analysis');
     } catch (err) {
       console.error('Registration failed:', err);
-      // Still advance for demo purposes
       setScreen('risk-analysis');
     } finally {
       setLoading(false);
@@ -59,19 +58,17 @@ export default function ZoneSetupScreen() {
       transition={pageTransition}
       className="min-h-screen bg-mist pb-28"
     >
-      {/* Header */}
       <div className="bg-klein px-6 pt-12 pb-8">
-        {/* Progress dots */}
         <div className="flex gap-2 mb-6">
-          {[0, 1, 2].map(i => (
+          {[0, 1, 2].map((i) => (
             <div key={i} className={`h-1.5 rounded-full ${i <= 1 ? 'w-8 bg-white' : 'w-4 bg-white/20'}`} />
           ))}
         </div>
         <button onClick={() => setScreen('platform-link')} className="font-jetbrains text-[11px] text-white/50 mb-4 block">
-          ← Back
+          Back
         </button>
         <h1 className="font-syne font-extrabold text-[26px] text-white tracking-headline">
-          Your zones & schedule
+          Your zones and schedule
         </h1>
         <p className="font-jetbrains text-[11px] mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
           This helps us calculate your zone-level risk score.
@@ -79,7 +76,6 @@ export default function ZoneSetupScreen() {
       </div>
 
       <div className="px-6 pt-6 space-y-6 -mt-2">
-        {/* Working zones */}
         <div className="card p-5">
           <h3 className="font-syne font-bold text-[14px] text-ink mb-1">Working zones</h3>
           <p className="font-jetbrains text-[10px] text-chrome mb-4">Select all zones you deliver in</p>
@@ -100,7 +96,6 @@ export default function ZoneSetupScreen() {
           </div>
         </div>
 
-        {/* Work days */}
         <div className="card p-5">
           <h3 className="font-syne font-bold text-[14px] text-ink mb-1">Work pattern</h3>
           <p className="font-jetbrains text-[10px] text-chrome mb-4">How many days per week do you typically work?</p>
@@ -121,7 +116,6 @@ export default function ZoneSetupScreen() {
           </div>
         </div>
 
-        {/* Emergency contact */}
         <div className="card p-5">
           <h3 className="font-syne font-bold text-[14px] text-ink mb-1">Emergency contact</h3>
           <p className="font-jetbrains text-[10px] text-chrome mb-4">Optional. For your safety during disruptions.</p>
@@ -144,8 +138,10 @@ export default function ZoneSetupScreen() {
         </div>
       </div>
 
-      {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-6 py-4 border-t" style={{ borderColor: 'rgba(0,47,167,0.08)' }}>
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-6 py-4 border-t"
+        style={{ borderColor: 'rgba(0,47,167,0.08)' }}
+      >
         <button
           onClick={handleContinue}
           disabled={selectedZones.length === 0 || !registrationData.work_days || loading}

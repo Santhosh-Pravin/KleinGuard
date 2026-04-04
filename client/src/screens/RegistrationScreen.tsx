@@ -16,17 +16,15 @@ export default function RegistrationScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Phone formatting
   const formatPhone = (val: string) => {
     const digits = val.replace(/\D/g, '').slice(0, 10);
     if (digits.length > 5) return `${digits.slice(0, 5)} ${digits.slice(5)}`;
     return digits;
   };
 
-  // OTP countdown timer
   useEffect(() => {
     if (countdown <= 0) return;
-    const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [countdown]);
 
@@ -36,6 +34,7 @@ export default function RegistrationScreen() {
       setErrors({ ...errors, phone: 'Enter a valid 10-digit number' });
       return;
     }
+
     setErrors({ ...errors, phone: '' });
     try {
       await sendOtp(`+91${phone}`);
@@ -49,26 +48,27 @@ export default function RegistrationScreen() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
+
     const newOtp = [...otpValues];
     newOtp[index] = value.slice(-1);
     setOtpValues(newOtp);
 
-    // Auto-advance
     if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
 
-    // Check if complete
     const fullOtp = newOtp.join('');
     if (fullOtp.length === 6) {
-      verifyOtp(`+91${registrationData.phone?.replace(/\s/g, '')}`, fullOtp).then((res) => {
-        if (res.data.valid) {
-          setOtpVerified(true);
-          setErrors({ ...errors, otp: '' });
-        }
-      }).catch(() => {
-        setErrors({ ...errors, otp: 'Invalid OTP. Try 123456.' });
-      });
+      verifyOtp(`+91${registrationData.phone?.replace(/\s/g, '')}`, fullOtp)
+        .then((res) => {
+          if (res.data.valid) {
+            setOtpVerified(true);
+            setErrors({ ...errors, otp: '' });
+          }
+        })
+        .catch(() => {
+          setErrors({ ...errors, otp: 'Invalid OTP. Try 123456.' });
+        });
     }
   };
 
@@ -81,8 +81,9 @@ export default function RegistrationScreen() {
   const handleContinue = () => {
     const newErrors: Record<string, string> = {};
     if (!registrationData.name?.trim()) newErrors.name = 'Name is required';
-    if (!registrationData.phone?.replace(/\s/g, '') || registrationData.phone.replace(/\s/g, '').length !== 10) 
+    if (!registrationData.phone?.replace(/\s/g, '') || registrationData.phone.replace(/\s/g, '').length !== 10) {
       newErrors.phone = 'Valid phone number required';
+    }
     if (!otpVerified) newErrors.otp = 'Verify your OTP';
     if (!registrationData.city) newErrors.city = 'Select a city';
     if (!registrationData.platform) newErrors.platform = 'Select a platform';
@@ -91,6 +92,7 @@ export default function RegistrationScreen() {
       setErrors(newErrors);
       return;
     }
+
     setScreen('platform-link');
   };
 
@@ -102,16 +104,14 @@ export default function RegistrationScreen() {
       transition={pageTransition}
       className="min-h-screen flex flex-col"
     >
-      {/* Header */}
       <div className="bg-klein px-6 pt-12 pb-8" style={{ minHeight: '28vh' }}>
-        {/* Progress dots */}
         <div className="flex gap-2 mb-6">
-          {[0, 1, 2].map(i => (
+          {[0, 1, 2].map((i) => (
             <div key={i} className={`h-1.5 rounded-full ${i === 0 ? 'w-8 bg-white' : 'w-4 bg-white/20'}`} />
           ))}
         </div>
         <button onClick={() => setScreen('splash')} className="font-jetbrains text-[11px] text-white/50 mb-4 block">
-          ← Back
+          Back
         </button>
         <h1 className="font-syne font-extrabold text-[28px] text-white tracking-headline">
           Create your account
@@ -121,9 +121,7 @@ export default function RegistrationScreen() {
         </p>
       </div>
 
-      {/* Form */}
       <div className="flex-1 bg-white rounded-t-xl -mt-3 px-6 pt-8 pb-28 space-y-5">
-        {/* Full name */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-2">FULL NAME</label>
           <input
@@ -135,24 +133,31 @@ export default function RegistrationScreen() {
           />
           <AnimatePresence>
             {errors.name && (
-              <motion.p initial={{ y: -5, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -5, opacity: 0 }}
-                className="text-danger font-jetbrains text-[10px] mt-1">{errors.name}</motion.p>
+              <motion.p
+                initial={{ y: -5, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -5, opacity: 0 }}
+                className="text-danger font-jetbrains text-[10px] mt-1"
+              >
+                {errors.name}
+              </motion.p>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Phone number */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-2">PHONE NUMBER</label>
           <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-jetbrains text-[13px] text-klein font-semibold bg-ice px-2 py-1 rounded-sm">+91</span>
+            <div className="flex flex-1 items-center gap-3 rounded-[14px] border border-[rgba(0,47,167,0.15)] bg-mist px-4 py-[14px]">
+              <span className="shrink-0 rounded-md bg-white px-2 py-1 font-jetbrains text-[13px] font-semibold text-klein shadow-sm">
+                +91
+              </span>
               <input
                 type="tel"
                 value={formatPhone(registrationData.phone || '')}
                 onChange={(e) => updateRegistration({ phone: e.target.value.replace(/\s/g, '') })}
                 placeholder="98765 43210"
-                className={`input-field pl-[72px] ${errors.phone ? 'border-danger' : ''}`}
+                className="min-w-0 flex-1 border-0 bg-transparent p-0 font-jetbrains text-[15px] text-ink outline-none placeholder:text-[#8FA3D4]"
               />
             </div>
             {!otpVerified && (
@@ -161,21 +166,24 @@ export default function RegistrationScreen() {
                 disabled={countdown > 0}
                 className="btn-secondary whitespace-nowrap"
               >
-                {countdown > 0 ? (
-                  <span className="font-jetbrains">{countdown}s</span>
-                ) : otpSent ? 'Resend' : 'Send OTP'}
+                {countdown > 0 ? <span className="font-jetbrains">{countdown}s</span> : otpSent ? 'Resend' : 'Send OTP'}
               </button>
             )}
           </div>
           <AnimatePresence>
             {errors.phone && (
-              <motion.p initial={{ y: -5, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -5, opacity: 0 }}
-                className="text-danger font-jetbrains text-[10px] mt-1">{errors.phone}</motion.p>
+              <motion.p
+                initial={{ y: -5, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -5, opacity: 0 }}
+                className="text-danger font-jetbrains text-[10px] mt-1"
+              >
+                {errors.phone}
+              </motion.p>
             )}
           </AnimatePresence>
         </div>
 
-        {/* OTP Input */}
         <AnimatePresence>
           {otpSent && !otpVerified && (
             <motion.div
@@ -188,7 +196,9 @@ export default function RegistrationScreen() {
                 {otpValues.map((val, i) => (
                   <input
                     key={i}
-                    ref={(el) => { otpRefs.current[i] = el; }}
+                    ref={(el) => {
+                      otpRefs.current[i] = el;
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -204,7 +214,6 @@ export default function RegistrationScreen() {
           )}
         </AnimatePresence>
 
-        {/* OTP Verified checkmark */}
         <AnimatePresence>
           {otpVerified && (
             <motion.div
@@ -212,13 +221,12 @@ export default function RegistrationScreen() {
               animate={{ scale: 1 }}
               className="flex items-center gap-2 bg-safe/10 text-safe font-jetbrains text-[11px] px-4 py-2.5 rounded-md"
             >
-              <span className="text-lg">✓</span>
+              <span className="font-semibold">Verified</span>
               Phone verified
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* City dropdown */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-2">CITY</label>
           <select
@@ -226,11 +234,10 @@ export default function RegistrationScreen() {
             onChange={(e) => updateRegistration({ city: e.target.value, zones: [] })}
             className={`input-field appearance-none ${errors.city ? 'border-danger' : ''}`}
           >
-            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
 
-        {/* Platform */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-2">PLATFORM</label>
           <select
@@ -238,11 +245,10 @@ export default function RegistrationScreen() {
             onChange={(e) => updateRegistration({ platform: e.target.value })}
             className={`input-field appearance-none ${errors.platform ? 'border-danger' : ''}`}
           >
-            {PLATFORMS.map(p => <option key={p.id} value={p.name}>{p.emoji} {p.name}</option>)}
+            {PLATFORMS.map((p) => <option key={p.id} value={p.name}>{p.emoji} {p.name}</option>)}
           </select>
         </div>
 
-        {/* Weekly income slider */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-1">WEEKLY INCOME ESTIMATE</label>
           <div className="font-data text-xl text-klein mb-2">{formatINR(registrationData.weekly_income || 12000)}</div>
@@ -256,11 +262,11 @@ export default function RegistrationScreen() {
             className="w-full accent-klein h-1.5"
           />
           <div className="flex justify-between font-jetbrains text-[9px] text-chrome mt-1">
-            <span>₹5,000</span><span>₹40,000</span>
+            <span>Rs 5,000</span>
+            <span>Rs 40,000</span>
           </div>
         </div>
 
-        {/* Working hours */}
         <div>
           <label className="font-jetbrains text-[10px] tracking-label text-chrome block mb-2">WORKING HOURS</label>
           <div className="flex items-center gap-3">
@@ -270,7 +276,7 @@ export default function RegistrationScreen() {
                 onChange={(e) => updateRegistration({ working_hours_start: Number(e.target.value) })}
                 className="input-field appearance-none text-center font-jetbrains"
               >
-                {Array.from({ length: 18 }, (_, i) => i + 6).map(h => (
+                {Array.from({ length: 18 }, (_, i) => i + 6).map((h) => (
                   <option key={h} value={h}>{h > 12 ? `${h - 12} PM` : h === 12 ? '12 PM' : `${h} AM`}</option>
                 ))}
               </select>
@@ -282,7 +288,7 @@ export default function RegistrationScreen() {
                 onChange={(e) => updateRegistration({ working_hours_end: Number(e.target.value) })}
                 className="input-field appearance-none text-center font-jetbrains"
               >
-                {Array.from({ length: 18 }, (_, i) => i + 6).map(h => (
+                {Array.from({ length: 18 }, (_, i) => i + 6).map((h) => (
                   <option key={h} value={h}>{h > 12 ? `${h - 12} PM` : h === 12 ? '12 PM' : `${h} AM`}</option>
                 ))}
               </select>
@@ -291,8 +297,10 @@ export default function RegistrationScreen() {
         </div>
       </div>
 
-      {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-6 py-4 border-t" style={{ borderColor: 'rgba(0,47,167,0.08)' }}>
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-6 py-4 border-t"
+        style={{ borderColor: 'rgba(0,47,167,0.08)' }}
+      >
         <button onClick={handleContinue} className="btn-primary">
           Continue
         </button>

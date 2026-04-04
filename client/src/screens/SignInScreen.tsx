@@ -14,6 +14,12 @@ export default function SignInScreen() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 10);
+    if (digits.length > 5) return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+    return digits;
+  };
+
   const handleSendOTP = async () => {
     if (phone.length < 10) return;
     setSendingOTP(true);
@@ -93,19 +99,22 @@ export default function SignInScreen() {
 
         <div className="space-y-2">
           <label className="font-syne font-bold text-[13px] text-ink">Phone Number</label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-syne font-semibold text-[15px] text-chrome">
+          <div className="flex items-center gap-3 rounded-[14px] border border-[rgba(0,47,167,0.15)] bg-mist px-4 py-[14px]">
+            <span className="shrink-0 rounded-md bg-white px-2 py-1 font-jetbrains font-semibold text-[13px] text-klein shadow-sm">
               +91
             </span>
             <input
               type="tel"
-              value={phone}
+              value={formatPhone(phone)}
               onChange={e => setPhone(e.target.value.replace(/\D/g, '').substring(0, 10))}
               disabled={step > 1}
               placeholder="98765 43210"
-              className="input-field pl-12"
+              className="min-w-0 flex-1 border-0 bg-transparent p-0 font-jetbrains text-[15px] text-ink outline-none placeholder:text-[#8FA3D4]"
             />
           </div>
+          <p className="font-jetbrains text-[10px] text-chrome">
+            Demo login: 9876543210 and OTP 123456
+          </p>
         </div>
 
         <AnimatePresence>
