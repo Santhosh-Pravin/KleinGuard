@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAppStore } from '../store/appStore';
+import { type Policy, useAppStore } from '../store/appStore';
 import { useCountUp } from '../hooks/useCountUp';
 import { formatINR } from '../lib/formatters';
 import { COVERAGE_ITEMS } from '../lib/mockData';
 import { activatePolicy } from '../lib/api';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 const FACTOR_LABELS: Record<string, string> = {
   zone_risk: 'Zone Risk Factor',
@@ -31,7 +31,9 @@ export default function PolicyOfferScreen() {
   const [hoveredFactor, setHoveredFactor] = useState<string | null>(null);
   const [barsReady, setBarsReady] = useState(false);
 
-  const offer = policyOffer || {
+  const offer: Policy = policyOffer || {
+    policy_ref: '',
+    status: 'draft',
     coverage_amount: 2000, weekly_premium: 52,
     premium_factors: { base_rate: 45, zone_risk: 0.82, aqi_exposure: 0.91, demand_volatility: 0.74, behavior_score: 0.95, claim_history: 1.00 },
     risk_score: 0.71, formula_display: '₹45 × 0.82 × 0.91 × 0.74 × 0.95 × 1.00 = ₹52/wk',
@@ -68,8 +70,8 @@ export default function PolicyOfferScreen() {
     }, 600);
   };
 
-  const factors = offer.factors || offer.premium_factors || {};
-  const factorEntries = Object.entries(factors).filter(([k]) => k !== 'base_rate' && k !== 'safety_compliance');
+  const factors = offer.premium_factors;
+  const factorEntries = Object.entries(factors).filter(([k]) => k !== 'base_rate' && k !== 'safety_compliance') as Array<[string, number]>;
 
   const RISK_BADGES = [
     { label: 'WEATHER RISK', value: factors.demand_volatility?.toString() || '0.74', level: 'Medium', color: '#F5A800' },

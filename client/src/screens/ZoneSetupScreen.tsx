@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore';
 import { CITY_ZONES, WORK_DAYS_OPTIONS } from '../lib/mockData';
 import { register } from '../lib/api';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 export default function ZoneSetupScreen() {
   const { registrationData, updateRegistration, setScreen, setToken } = useAppStore();

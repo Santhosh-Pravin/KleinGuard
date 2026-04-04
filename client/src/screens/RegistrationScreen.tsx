@@ -5,7 +5,7 @@ import { CITIES, PLATFORMS } from '../lib/mockData';
 import { formatINR } from '../lib/formatters';
 import { sendOtp, verifyOtp } from '../lib/api';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 export default function RegistrationScreen() {
   const { registrationData, updateRegistration, setScreen } = useAppStore();

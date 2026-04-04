@@ -8,7 +8,7 @@ import { useCountUp } from '../hooks/useCountUp';
 import BottomNav from '../components/BottomNav';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 export default function CoverageScreen() {
   const { policy, setPolicy, user, addToast } = useAppStore();
@@ -41,7 +41,7 @@ export default function CoverageScreen() {
     } catch {
       // Fallback: simple proportional calculation
       const ratio = value / 2000;
-      setAdjustedPremium({ weekly_premium: Math.round(52 * ratio), formula_display: `₹45 × factors × ${ratio.toFixed(1)} = ₹${Math.round(52 * ratio)}/wk` });
+      setAdjustedPremium({ weekly_premium: Math.round(52 * ratio), formula_display: `Rs45 x factors x ${ratio.toFixed(1)} = Rs${Math.round(52 * ratio)}/wk` });
     }
     setIsAdjusting(false);
   };
@@ -52,8 +52,6 @@ export default function CoverageScreen() {
     addToast({ message: 'Copied.', type: 'success', duration: 2000 });
     setTimeout(() => setCopiedRef(false), 2000);
   };
-
-  const factors = adjustedPremium?.factors || policy?.premium_factors || {};
 
   return (
     <motion.div
@@ -96,11 +94,11 @@ export default function CoverageScreen() {
             <span className="font-jetbrains text-[11px] tracking-mono text-klein">
               {policy?.policy_ref || 'KG-CHN-2024-001847'}
             </span>
-            <span className="text-[10px] text-chrome">{copiedRef ? '✓' : '📋'}</span>
+            <span className="text-[10px] text-chrome">{copiedRef ? 'OK' : 'Copy'}</span>
           </button>
 
           <p className="font-jetbrains text-[10px] text-chrome">
-            Renews in {policy?.days_until_reset || 4} days — premium may adjust
+            Renews in {policy?.days_until_reset || 4} days - premium may adjust
           </p>
         </motion.div>
 
@@ -153,7 +151,7 @@ export default function CoverageScreen() {
             className="w-full accent-klein h-1.5"
           />
           <div className="flex justify-between font-jetbrains text-[9px] text-chrome mt-1">
-            <span>₹2,000</span><span>₹5,000</span>
+            <span>Rs 2,000</span><span>Rs 5,000</span>
           </div>
 
           {/* Live formula */}

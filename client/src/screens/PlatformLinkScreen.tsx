@@ -4,7 +4,7 @@ import { useAppStore } from '../store/appStore';
 import { PLATFORMS } from '../lib/mockData';
 import LoadingArc from '../components/LoadingArc';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 const LOADING_TEXTS = [
   'Connecting to platform...',

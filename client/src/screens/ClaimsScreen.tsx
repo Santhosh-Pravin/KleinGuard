@@ -5,10 +5,10 @@ import { formatINR, formatTime, getTriggerInfo, getClaimStatusInfo } from '../li
 import { getClaims } from '../lib/api';
 import BottomNav from '../components/BottomNav';
 
-const pageTransition = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
+const pageTransition: any = { duration: 0.45, ease: [0.22, 1, 0.36, 1] };
 
 export default function ClaimsScreen() {
-  const { claims, setClaims, setShowPayout } = useAppStore();
+  const { claims, setClaims } = useAppStore();
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const [expandedClaim, setExpandedClaim] = useState<number | null>(null);
 
@@ -180,7 +180,7 @@ function ActiveClaimCard({ claim }: { claim: any }) {
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
                 step.done ? 'bg-klein text-white' : 'bg-mist text-chrome'
               }`}>
-                {step.done ? '✓' : i + 1}
+                {step.done ? 'Done' : i + 1}
               </div>
               <span className={`font-jetbrains text-[9px] ml-1.5 ${step.done ? 'text-ink' : 'text-chrome'}`}>
                 {step.label}
@@ -194,7 +194,7 @@ function ActiveClaimCard({ claim }: { claim: any }) {
 
         {/* Time estimate */}
         <p className="font-jetbrains text-[10px] text-chrome">
-          Estimated payout: within 2–4 hrs
+          Estimated payout: within 2-4 hrs
         </p>
 
         {/* Human copy */}
