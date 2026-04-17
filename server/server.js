@@ -60,34 +60,28 @@ app.use('/api/mock/traffic', trafficRouter);
 app.use('/api/mock/platform/orders', platformRouter);
 
 // Force trigger routes — unified endpoint
-app.post('/api/mock/force-trigger/:type', (req, res) => {
+app.post('/api/mock/force-trigger/:type', async (req, res) => {
   const { type } = req.params;
   const zone = req.body.zone || 'Adyar';
+  const severity = req.body.severity || 'high';
+  const instant = req.body.instant || false;
   
-  // Forward to appropriate mock API
-  const routeMap = {
-    rain: '/api/mock/weather/force-rain',
-    flood: '/api/mock/weather/force-flood',
-    heat: '/api/mock/weather/force-heat',
-    aqi: '/api/mock/aqi/force-aqi',
-    demand: '/api/mock/platform/orders/force-demand',
-    traffic: '/api/mock/traffic/force-traffic',
-  };
+  // Set mock values for the simulation based on trigger type and severity
+  let rawValue, threshold;
+  if (type === 'rain') { rawValue = severity === 'critical' ? 45 : 20; threshold = 15; }
+  else if (type === 'flood') { rawValue = severity === 'critical' ? 60 : 35; threshold = 30; }
+  else if (type === 'heat') { rawValue = severity === 'critical' ? 46 : 43; threshold = 42; }
+  else if (type === 'aqi') { rawValue = severity === 'critical' ? 450 : 300; threshold = 200; }
+  else if (type === 'demand') { rawValue = severity === 'critical' ? 60 : 25; threshold = 10; }
+  else if (type === 'traffic') { rawValue = severity === 'critical' ? 0.9 : 0.8; threshold = 0.75; }
+  else { rawValue = 10; threshold = 5; }
 
-  // Trigger the force endpoint and then run a manual check
-  const forwardUrl = routeMap[type];
-  if (!forwardUrl) return res.status(400).json({ error: 'Unknown trigger type' });
-
-  // Simulate internal request
-  req.url = forwardUrl;
-  req.body = { zone };
-  
-  // Just force the mock data and manually fire trigger check
-  triggerMonitor.runChecks().then(() => {
-    res.json({ success: true, type, zone, message: `${type} trigger fired for ${zone}` });
-  }).catch(err => {
+  try {
+    await triggerMonitor.fireTrigger(type, zone, rawValue, threshold, severity, instant);
+    res.json({ success: true, type, zone, severity, instant, message: `Admin Simulation: ${type.toUpperCase()} triggered in ${zone} with ${severity} severity. (Instant: ${instant})` });
+  } catch (err) {
     res.status(500).json({ error: err.message });
-  });
+  }
 });
 
 // Demo reset endpoint

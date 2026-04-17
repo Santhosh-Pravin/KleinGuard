@@ -106,12 +106,22 @@ export default function ClaimsScreen() {
                       >
                         <p className="font-jetbrains text-[9px] tracking-label text-chrome mb-2">SIGNAL BREAKDOWN</p>
                         <div className="space-y-1.5">
-                          {Object.entries(claim.signal_summary || {}).map(([key, val]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="font-jetbrains text-[10px] text-chrome">{key.replace(/_/g, ' ')}</span>
-                              <span className="font-jetbrains text-[10px] text-ink font-medium">{String(val)}</span>
-                            </div>
-                          ))}
+                          {Object.entries(claim.signal_summary || {}).map(([key, val]) => {
+                            if (key === 'fraud_signals' && typeof val === 'object') {
+                              return Object.keys(val as object).map(signal => (
+                                <div key={signal} className="flex justify-between">
+                                  <span className="font-jetbrains text-[10px] text-danger">⚠️ {signal.replace(/_/g, ' ')}</span>
+                                  <span className="font-jetbrains text-[10px] text-ink font-medium">Detected</span>
+                                </div>
+                              ));
+                            }
+                            return (
+                              <div key={key} className="flex justify-between">
+                                <span className="font-jetbrains text-[10px] text-chrome">{key.replace(/_/g, ' ')}</span>
+                                <span className="font-jetbrains text-[10px] text-ink font-medium">{String(val)}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     )}

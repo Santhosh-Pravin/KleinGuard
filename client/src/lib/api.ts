@@ -40,6 +40,8 @@ export const getClaimDetail = (id: number) => api.get(`/claims/${id}`);
 export const getClaimStats = () => api.get('/claims/stats');
 export const payoutClaim = (id: number) => api.put(`/claims/${id}/payout`);
 export const resetClaims = () => api.post('/claims/reset');
+export const getAdminPendingClaims = () => api.get('/claims/admin/pending');
+export const resolveAdminClaim = (id: number, action: 'accept' | 'reject') => api.post(`/claims/admin/${id}/resolve`, { action });
 
 // Triggers
 export const getActiveTriggers = () => api.get('/triggers/active');

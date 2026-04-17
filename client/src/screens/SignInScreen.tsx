@@ -102,8 +102,8 @@ export default function SignInScreen() {
               value={phone}
               onChange={e => setPhone(e.target.value.replace(/\D/g, '').substring(0, 10))}
               disabled={step > 1}
-              placeholder="98765 43210"
-              className="input-field pl-12"
+              placeholder={phone.length === 0 ? "98765 43210" : ""}
+              className="input-field pl-12 pr-4 text-right"
             />
           </div>
         </div>
@@ -171,8 +171,7 @@ export default function SignInScreen() {
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-6 py-4 border-t"
-            style={{ borderColor: 'rgba(0,47,167,0.08)' }}
+            className="mt-8 bg-white px-2 py-4"
           >
             <button
               onClick={handleVerify}

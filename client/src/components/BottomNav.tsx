@@ -13,7 +13,7 @@ export default function BottomNav() {
   const { activeTab, setActiveTab, setScreen } = useAppStore();
 
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t" style={{ borderColor: 'rgba(0,47,167,0.1)' }}>
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white dark:bg-[#060B14] border-t dark:border-white/10" style={{ borderColor: 'rgba(0,47,167,0.1)' }}>
       <div className="flex items-center justify-around py-2 px-4">
         {tabs.map((tab) => (
           <button

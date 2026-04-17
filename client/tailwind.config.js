@@ -1,11 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
+      screens: {
+        'landscape': {'raw': '(orientation: landscape)'},
+      },
       colors: {
         klein: '#002FA7',
         kleinDark: '#001E6E',
@@ -22,6 +26,7 @@ export default {
         warn: '#F5A800',
         danger: '#F53D5B',
         payout: '#7B61FF',
+        neonPink: '#FF00FF', // Vivid neon pink
       },
       fontFamily: {
         syne: ['Syne', 'sans-serif'],
@@ -38,6 +43,7 @@ export default {
         sm: '0 2px 8px rgba(0,47,167,0.08)',
         md: '0 8px 32px rgba(0,47,167,0.12)',
         lg: '0 20px 60px rgba(0,47,167,0.18)',
+        neon: '0 0 10px rgba(255,0,255,0.8), 0 0 20px rgba(255,0,255,0.4)',
       },
       letterSpacing: {
         headline: '-0.04em',

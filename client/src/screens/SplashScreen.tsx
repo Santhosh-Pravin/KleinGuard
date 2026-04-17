@@ -76,6 +76,16 @@ export default function SplashScreen() {
         >
           Sign In
         </motion.button>
+        <motion.button
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => setScreen('admin-login')}
+          className="bg-transparent text-white/50 font-jetbrains text-xs mt-2 uppercase tracking-widest hover:text-neonPink transition-colors w-full"
+        >
+          Administrator Log In
+        </motion.button>
       </div>
 
       {/* Legal line */}

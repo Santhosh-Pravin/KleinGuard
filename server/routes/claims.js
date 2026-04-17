@@ -22,6 +22,40 @@ router.get('/', authMiddleware, (req, res) => {
   res.json(claims);
 });
 
+// GET /api/claims/admin/pending
+router.get('/admin/pending', authMiddleware, (req, res) => {
+  const db = getDb();
+  
+  // Note: authMiddleware checks token presence. We assume the admin client has a valid token.
+  const claims = db.prepare(`
+    SELECT c.*, t.type as trigger_type, t.zone as trigger_zone, t.severity, t.raw_value, u.name as user_name, u.phone as user_phone
+    FROM claims c
+    LEFT JOIN triggers t ON c.trigger_id = t.id
+    LEFT JOIN users u ON c.user_id = u.id
+    WHERE c.status IN ('under_review', 'escalated')
+    ORDER BY c.created_at DESC
+  `).all();
+
+  claims.forEach(c => {
+    c.signal_summary = JSON.parse(c.signal_summary || '{}');
+  });
+
+  res.json(claims);
+});
+
+// POST /api/claims/admin/:id/resolve
+router.post('/admin/:id/resolve', authMiddleware, (req, res) => {
+  const db = getDb();
+  const { action } = req.body;
+  const newStatus = action === 'accept' ? 'paid' : 'declined';
+  
+  db.prepare(`
+    UPDATE claims SET status = ?, resolved_at = datetime('now') WHERE id = ?
+  `).run(newStatus, req.params.id);
+  
+  res.json({ success: true, status: newStatus });
+});
+
 // GET /api/claims/stats
 router.get('/stats', authMiddleware, (req, res) => {
   const db = getDb();

@@ -67,54 +67,42 @@ export class TriggerMonitor {
       conditionsUpdate[zone] = { weather, aqi, traffic, orders };
 
       // Check rain trigger
-      if (weather.rainfall_mm > this.thresholds.rain_mm) {
-        await this.fireTrigger('rain', zone, weather.rainfall_mm, this.thresholds.rain_mm,
-          weather.rainfall_mm > 25 ? 'high' : 'medium');
-      }
+      // if (weather.rainfall_mm > this.thresholds.rain_mm) {
+      //   await this.fireTrigger('rain', zone, weather.rainfall_mm, this.thresholds.rain_mm, weather.rainfall_mm > 25 ? 'high' : 'medium');
+      // }
 
       // Check flood (combo trigger)
-      if (weather.rainfall_mm > 30 && weather.flood_alert) {
-        await this.fireTrigger('flood', zone, weather.rainfall_mm, 30, 'critical');
-      }
+      // if (weather.rainfall_mm > 30 && weather.flood_alert) {
+      //   await this.fireTrigger('flood', zone, weather.rainfall_mm, 30, 'critical');
+      // }
 
       // Check heat
-      if (weather.temp_c > this.thresholds.temp_c) {
-        await this.fireTrigger('heat', zone, weather.temp_c, this.thresholds.temp_c,
-          weather.temp_c > 45 ? 'critical' : 'high');
-      }
+      // if (weather.temp_c > this.thresholds.temp_c) {
+      //   await this.fireTrigger('heat', zone, weather.temp_c, this.thresholds.temp_c, weather.temp_c > 45 ? 'critical' : 'high');
+      // }
 
       // Check AQI
-      if (aqi.aqi_value > this.thresholds.aqi) {
-        await this.fireTrigger('aqi', zone, aqi.aqi_value, this.thresholds.aqi, 'critical');
-      }
+      // if (aqi.aqi_value > this.thresholds.aqi) {
+      //   await this.fireTrigger('aqi', zone, aqi.aqi_value, this.thresholds.aqi, 'critical');
+      // }
 
       // Check demand drop
-      if (orders.drop_pct > this.thresholds.demand_drop_pct) {
-        await this.fireTrigger('demand', zone, orders.drop_pct, this.thresholds.demand_drop_pct,
-          orders.drop_pct > 50 ? 'high' : 'medium');
-      }
+      // if (orders.drop_pct > this.thresholds.demand_drop_pct) {
+      //   await this.fireTrigger('demand', zone, orders.drop_pct, this.thresholds.demand_drop_pct, orders.drop_pct > 50 ? 'high' : 'medium');
+      // }
 
       // Check traffic
-      if (traffic.congestion_index > this.thresholds.traffic_congestion) {
-        await this.fireTrigger('traffic', zone, traffic.congestion_index, this.thresholds.traffic_congestion, 'high');
-      }
+      // if (traffic.congestion_index > this.thresholds.traffic_congestion) {
+      //   await this.fireTrigger('traffic', zone, traffic.congestion_index, this.thresholds.traffic_congestion, 'high');
+      // }
     }
 
     // Emit conditions update to all connected clients
     this.io?.emit('conditions:update', conditionsUpdate);
   }
 
-  async fireTrigger(type, zone, rawValue, threshold, severity) {
+  async fireTrigger(type, zone, rawValue, threshold, severity, instant = false) {
     const db = getDb();
-
-    // Check for duplicate — don't fire same trigger type+zone within 5 minutes
-    const recent = db.prepare(`
-      SELECT id FROM triggers 
-      WHERE type = ? AND zone = ? AND is_active = 1 
-      AND triggered_at > datetime('now', '-5 minutes')
-    `).get(type, zone);
-
-    if (recent) return;
 
     // Insert trigger record
     const result = db.prepare(`
@@ -123,15 +111,15 @@ export class TriggerMonitor {
     `).run(type, zone, severity, rawValue, threshold);
 
     const triggerId = result.lastInsertRowid;
-    const trigger = { id: triggerId, type, zone, severity, raw_value: rawValue, threshold };
+    const trigger = { id: triggerId, type, zone, severity, raw_value: rawValue, threshold, instant };
 
-    console.log(`[TriggerMonitor] 🔔 ${type.toUpperCase()} trigger in ${zone} — value: ${rawValue} (threshold: ${threshold})`);
+    console.log(`[TriggerMonitor] 🔔 ${type.toUpperCase()} trigger in ${zone} — value: ${rawValue} (threshold: ${threshold}) [Instant: ${instant}]`);
 
     // Emit trigger event
     this.io?.emit('trigger:new', trigger);
 
     // Process auto-claims for affected users
-    const affectedUsers = this.getAffectedUsers(zone);
+    const affectedUsers = this.getAffectedUsers(zone, instant);
     for (const user of affectedUsers) {
       try {
         const claim = await processAutoClaim(user, trigger, this.io);
@@ -150,16 +138,22 @@ export class TriggerMonitor {
     }, resolveDelay);
   }
 
-  getAffectedUsers(zone) {
+  getAffectedUsers(zone, instant = false) {
     const db = getDb();
     const users = db.prepare(`
       SELECT u.* FROM users u
-      JOIN policies p ON u.id = p.user_id
-      WHERE p.status = 'active'
     `).all();
 
     return users.filter(u => {
+      // For instant triggers, we want to visually demonstrate the payout to WHATEVER user is logged in natively
+      // Otherwise, restrict tightly by active policy and zone match
+      if (instant) {
+        return true; 
+      }
+      
       try {
+        const policy = db.prepare(`SELECT id FROM policies WHERE user_id = ? AND status = 'active'`).get(u.id);
+        if (!policy) return false;
         const zones = JSON.parse(u.zones || '[]');
         return zones.includes(zone);
       } catch { return false; }

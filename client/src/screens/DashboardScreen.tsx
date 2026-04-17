@@ -25,8 +25,6 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadConditions, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {
@@ -80,15 +78,17 @@ export default function DashboardScreen() {
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={pageTransition}
-      className="min-h-screen bg-mist pb-24"
+      className="min-h-screen bg-mist dark:bg-ink pb-24"
     >
       {/* Header */}
-      <div className="bg-klein px-6 pt-10 pb-6">
+      <div className="bg-klein dark:bg-[#060B14] px-6 pt-10 pb-6 border-b border-transparent dark:border-white/10">
         <div className="flex justify-between items-start">
           <h2 className="font-syne font-bold text-[20px] text-white">
             {greeting}, {userName}
           </h2>
-          <button className="text-white/60 text-xl">🔔</button>
+          <div className="flex gap-3">
+             <button className="text-white/60 text-xl">🔔</button>
+          </div>
         </div>
 
         {/* Status pill */}
@@ -216,11 +216,11 @@ export default function DashboardScreen() {
             {[
               { label: 'Expected', value: formatINR(2200) },
               { label: 'Earned', value: formatINR(totalWeekEarnings || 1840) },
-              { label: 'Protected', value: formatINR(Math.round(protectedAmount) || 360) },
+              { label: 'Protected', value: formatINR(Math.round(protectedAmount) || 360), glow: true },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <p className="font-jetbrains text-[9px] text-chrome">{s.label}</p>
-                <p className="font-jetbrains text-[12px] font-bold text-ink mt-0.5">{s.value}</p>
+                <p className={`font-jetbrains text-[12px] font-bold mt-0.5 ${s.glow ? 'text-safe drop-shadow-md' : 'text-ink dark:text-white'}`}>{s.value}</p>
               </div>
             ))}
           </div>
@@ -305,11 +305,18 @@ export default function DashboardScreen() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right flex items-center gap-2">
+                    <div className="text-right flex flex-col items-end gap-1">
                       <span className="font-data text-[13px] text-ink">{formatINR(claim.payout_amount)}</span>
-                      <span className={`${status.pillClass} font-jetbrains text-[9px] font-bold px-2 py-1 rounded-sm`}>
-                        {status.label}
-                      </span>
+                      <div className="flex gap-1.5 items-center">
+                         {(claim as any).signal_summary?.fraud_risk && (
+                            <span className={`font-jetbrains text-[7px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border ${(claim as any).signal_summary.fraud_risk === 'High' ? 'text-danger border-danger/30 bg-danger/10' : (claim as any).signal_summary.fraud_risk === 'Medium' ? 'text-warn border-warn/30 bg-warn/10' : 'text-safe border-safe/30 bg-safe/10'}`}>
+                              Risk: {(claim as any).signal_summary.fraud_risk}
+                            </span>
+                         )}
+                         <span className={`${status.pillClass} font-jetbrains text-[9px] font-bold px-2 py-1 rounded-sm`}>
+                           {status.label}
+                         </span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -319,60 +326,9 @@ export default function DashboardScreen() {
         </motion.div>
       </div>
 
-      {/* Demo controls */}
-      {demoMode && <DemoControls />}
-
       <BottomNav />
     </motion.div>
   );
 }
 
-function DemoControls() {
-  const { addToast } = useAppStore();
-  const triggers = [
-    { type: 'rain', label: '🌧 Rain' },
-    { type: 'flood', label: '🌊 Flood' },
-    { type: 'heat', label: '🔥 Heat' },
-    { type: 'aqi', label: '🌫 AQI' },
-    { type: 'demand', label: '📉 Demand' },
-  ];
 
-  const handleTrigger = async (type: string) => {
-    try {
-      await forceTrigger(type, 'Adyar');
-      addToast({ message: `${type} trigger fired for Adyar.`, type: 'info' });
-    } catch (err) {
-      addToast({ message: 'Trigger failed.', type: 'error' });
-    }
-  };
-
-  const handleReset = async () => {
-    try {
-      await resetDemo();
-      addToast({ message: 'Demo reset.', type: 'success' });
-      window.location.reload();
-    } catch {}
-  };
-
-  return (
-    <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="fixed bottom-20 right-3 z-40 card p-3 shadow-lg"
-      style={{ maxWidth: '200px' }}
-    >
-      <p className="font-jetbrains text-[9px] tracking-label text-chrome mb-2">DEMO CONTROLS</p>
-      <div className="flex flex-wrap gap-1.5">
-        {triggers.map(t => (
-          <button key={t.type} onClick={() => handleTrigger(t.type)}
-            className="text-[11px] px-2 py-1.5 rounded-sm bg-mist hover:bg-ice transition-colors font-jetbrains">
-            {t.label}
-          </button>
-        ))}
-      </div>
-      <button onClick={handleReset} className="mt-2 w-full text-[10px] px-2 py-1.5 rounded-sm bg-danger/10 text-danger font-jetbrains font-bold">
-        Reset Demo
-      </button>
-    </motion.div>
-  );
-}
